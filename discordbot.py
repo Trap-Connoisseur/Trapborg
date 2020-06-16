@@ -525,7 +525,7 @@ async def creategiveaway(ctx):
         
     await asyncio.sleep(duration-60)
     await channel.send(embed=discord.Embed(title=f"ONE MORE MINUTE TO ENTER"))
-    await asyncio.sleep(5)
+    await asyncio.sleep(60)
     winnerid=r.choice(entries)
     winner= bot.get_user(int(winnerid))
     await channel.send(embed=discord.Embed(title=f"THE WINNER IS {winner}"))
