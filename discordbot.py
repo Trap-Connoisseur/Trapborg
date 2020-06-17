@@ -52,7 +52,7 @@ async def on_message(message):
         )
     if message.content == "Hey Trapborg, are traps straight?":
         await message.channel.send(
-            f"{message.author.mention} Yes! UwU"
+            f"{message.author.mention} Yes!"
         )
     if message.content == "Hey Trapborg, do you like traps?":
         await message.channel.send(
@@ -90,7 +90,7 @@ async def bye(ctx):
 
 @bot.command(name="FBI", help="FBI OPEN UP")
 async def FBI(ctx):
-    await ctx.send(file=discord.File("FBI.gif")) #ad a file that is FBI related
+    await ctx.send(file=discord.File("FBI.gif")) #add a file that is FBI related
 
 @bot.command(name="pat", help="pat someones head")
 async def pat(ctx, member: discord.Member = None):
