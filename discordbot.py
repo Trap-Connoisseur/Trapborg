@@ -489,6 +489,12 @@ async def creategiveaway(ctx):
             return False
         else:
             return True
+
+    if msg != None:
+        await ctx.send(
+            f"Sorry, my small femboy body can only handle one giveaway at the time."
+        )
+        return
     
     while channel==None:
         await ctx.send(
@@ -525,13 +531,16 @@ async def creategiveaway(ctx):
         
     await asyncio.sleep(duration-60)
     await channel.send(embed=discord.Embed(title=f"ONE MORE MINUTE TO ENTER"))
-    await asyncio.sleep(60)
-    winnerid=r.choice(entries)
-    winner= bot.get_user(int(winnerid))
-    await channel.send(embed=discord.Embed(title=f"THE WINNER IS {winner}"))
-    await channel.send(winner.mention)
-    msg= None
-    entries.clear()
+    if not entries:
+        await channel.send(embed=discord.Embed(title=f"There are no entries so no winner"))
+        msg= None
+    else:
+        winnerid=r.choice(entries)
+        winner= bot.get_user(int(winnerid))
+        await channel.send(embed=discord.Embed(title=f"THE WINNER IS {winner}"))
+        await channel.send(winner.mention)
+        msg= None
+        entries.clear()
 
 @bot.event
 async def on_raw_reaction_add(payload):
