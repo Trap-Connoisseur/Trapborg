@@ -149,9 +149,7 @@ class Usefull(commands.Cog):
             return ctx.send(embed=embed)
         await help_embed()
 
-
-
-
+ 
 #DATABASE
 class TrapDataBase(commands.Cog):
     def __init__(self,bot):
@@ -212,7 +210,7 @@ class TrapDataBase(commands.Cog):
 class Casino(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
-        self.lock = asyncio.Lock()
+        self.slots =[]
     
     #BLACKJACK
     @commands.command()
@@ -466,58 +464,63 @@ class Casino(commands.Cog):
     # SLOTS
     @commands.command(aliases=["slots"])
     async def slotmachine(self,ctx):
-        async with self.lock:
-            count = 0
-            player = ctx.author
-            conn = sqlite3.connect("trap.db")
-            c = conn.cursor()
-            member = str(ctx.author.id)
-            t=(member,)
-            c.execute("SELECT TrapCoin FROM points WHERE member=?", t)
-            puntjes = c.fetchone()
-            if (puntjes[0]-10 < 0):
-                poor = discord.Embed(title="You don't have enough TrapCoins!")
-                await ctx.send(embed=poor)
-                return
-            embed = discord.Embed(title= f"You put in 10TrapCoins \n :100::100::100:=1500 \n :four_leaf_clover::four_leaf_clover::four_leaf_clover:=500 \n :cherries::cherries::100:=350 \n |TRAPSLOTS| \n | [0][0][0] |")
-            message = await ctx.send(embed=embed)
-            await asyncio.sleep(3)
-            while count < 5:
-                Rando_Dizzle = [":100:", ":green_apple:", ":four_leaf_clover:", ":grapes:", ":cherries:"]
-                fruits = [":apple:", ":strawberry:", ":cherries:"]
-                random1= r.choice(Rando_Dizzle)
-                random2= r.choice(Rando_Dizzle)
-                random3= r.choice(Rando_Dizzle)
-                top=":100::100::100:=1500 \n :four_leaf_clover::four_leaf_clover::four_leaf_clover:=500 \n :cherries::cherries::100:=350 \n|TRAPSLOTS| \n"
-                bot=f"| [{random1}][{random2}][{random3}] |"
-                new_embed = discord.Embed(title=top + bot)
-                await message.edit(embed=new_embed)
-                count += 1
-            if random1 == ":100:" and random2 == ":100:" and random3 == ":100:":
-                updated_coins = (puntjes[0]+ 1490)
-                text = "JACKPOT!! \n You won 1500TrapCoins"
-            elif random1 in fruits and random2 in fruits and random3 == ":100:":
-                if random1 == random2:
-                    updated_coins = (puntjes[0]+ 340)
-                    text = "You won 350TrapCoins"
-                else:
-                    updated_coins = (puntjes[0]+ 240)
-                    text = "You won 250TrapCoins"
-            elif random1 == random2 and random1 == random3:
-                updated_coins = (puntjes[0]+ 490)
-                text = "You won 500TrapCoins"
-            else :
-                updated_coins = (puntjes[0]- 10)
-                text = "Sadly you won nothing"
+        if ctx.author.id in self.slots:
+            await ctx.send(embed=discord.Embed(title="You can only play 1 slotmachine at the time!"))
+            return
+        self.slots.append(ctx.author.id)
+        count = 0
+        player = ctx.author
+        conn = sqlite3.connect("trap.db")
+        c = conn.cursor()
+        member = str(ctx.author.id)
+        t=(member,)
+        c.execute("SELECT TrapCoin FROM points WHERE member=?", t)
+        puntjes = c.fetchone()
+        if (puntjes[0]-10 < 0):
+            poor = discord.Embed(title="You don't have enough TrapCoins!")
+            await ctx.send(embed=poor)
+            self.slots.remove(ctx.author.id)
+            return
+        embed = discord.Embed(title= f"You put in 10TrapCoins \n :100::100::100:=1500 \n :four_leaf_clover::four_leaf_clover::four_leaf_clover:=500 \n :cherries::cherries::100:=350 \n |TRAPSLOTS| \n | [0][0][0] |")
+        message = await ctx.send(embed=embed)
+        await asyncio.sleep(3)
+        while count < 5:
+            Rando_Dizzle = [":100:", ":green_apple:", ":four_leaf_clover:", ":grapes:", ":cherries:"]
+            fruits = [":apple:", ":strawberry:", ":cherries:"]
+            random1= r.choice(Rando_Dizzle)
+            random2= r.choice(Rando_Dizzle)
+            random3= r.choice(Rando_Dizzle)
+            top=":100::100::100:=1500 \n :four_leaf_clover::four_leaf_clover::four_leaf_clover:=500 \n :cherries::cherries::100:=350 \n|TRAPSLOTS| \n"
+            bot=f"| [{random1}][{random2}][{random3}] |"
+            new_embed = discord.Embed(title=top + bot)
+            await message.edit(embed=new_embed)
+            count += 1
+        if random1 == ":100:" and random2 == ":100:" and random3 == ":100:":
+            updated_coins = (puntjes[0]+ 1490)
+            text = "JACKPOT!! \n You won 1500TrapCoins"
+        elif random1 in fruits and random2 in fruits and random3 == ":100:":
+            if random1 == random2:
+                updated_coins = (puntjes[0]+ 340)
+                text = "You won 350TrapCoins"
+            else:
+                updated_coins = (puntjes[0]+ 240)
+                text = "You won 250TrapCoins"
+        elif random1 == random2 and random1 == random3:
+            updated_coins = (puntjes[0]+ 490)
+            text = "You won 500TrapCoins"
+        else :
+            updated_coins = (puntjes[0]- 10)
+            text = "Sadly you won nothing"
 
-            t= player.id
-            data =(updated_coins, str(t))
-            c.execute("UPDATE points SET TrapCoin=? WHERE member=?", data)
-            conn.commit()
-            conn.close()
-            embed= discord.Embed(title=f"{player.display_name} {text}")
-            await ctx.channel.send(embed=embed)
-
+        t= player.id
+        data =(updated_coins, str(t))
+        c.execute("UPDATE points SET TrapCoin=? WHERE member=?", data)
+        conn.commit()
+        conn.close()
+        self.slots.remove(ctx.author.id)
+        embed= discord.Embed(title=f"{player.display_name} {text}")
+        await ctx.channel.send(embed=embed)
+        
     #CASINO HELP COMMAND        
     @commands.command(aliases=["casino"])
     async def casinohelp(self, ctx):
@@ -647,8 +650,7 @@ async def on_member_join(member):
             await channel.send(
                 f"{member.name}, I welcome you to the Council of the Gay Frogs"
             )
-
-            
+           
 @bot.event
 async def on_ready():
     print("Ret-2-Go")
