@@ -206,6 +206,15 @@ class TrapDataBase(commands.Cog):
         conn.close()
         await ctx.channel.send(f'{ctx.author.mention}, you have {Coinamount}TrapCoins!')
 
+    @commands.command()
+    async def DBreset(self, ctx):
+        conn = sqlite3.connect("trap.db")
+        c = conn.cursor()
+        c.execute("UPDATE points SET TrapCoin = 100 ")
+        conn.commit()
+        conn.close()
+        await ctx.channel.send(f'The Trap-database has been reset!')
+
 #CASINO
 class Casino(commands.Cog):
     def __init__(self,bot):
@@ -296,10 +305,13 @@ class Casino(commands.Cog):
                 Coinamount = str(puntjes[0])
                 try:
                     bet = int(answer)
-                    if (puntjes[0]-bet) >= 0:
-                        break
-                    elif (puntjes[0]-bet) < 0:
-                        await ctx.channel.send(embed=discord.Embed(title=f"{player.display_name}, you don't have that many TrapCoins! \n You have {Coinamount} Trapcoins left"))
+                    if bet < 0:
+                        await ctx.channel.send(embed=discord.Embed(title=f"{player.display_name}, you can't bet negative amounts"))
+                    else:
+                        if (puntjes[0]-bet) >= 0:
+                            break
+                        elif (puntjes[0]-bet) < 0:
+                            await ctx.channel.send(embed=discord.Embed(title=f"{player.display_name}, you don't have that many TrapCoins! \n You have {Coinamount} Trapcoins left"))
                 except ValueError:
                     await ctx.channel.send(embed=discord.Embed(title=(player.display_name)+"Invalid bet, please give a number"))
             except asyncio.TimeoutError:
@@ -444,10 +456,13 @@ class Casino(commands.Cog):
             Coinamount = str(puntjes[0])
             try:
                 betamount = int(answer)
-                if (puntjes[0]-betamount) >= 0:
-                    break
-                elif (puntjes[0]-betamount) < 0:
-                    await ctx.channel.send(embed=discord.Embed(title= f"{player.display_name}, you don't have that many TrapCoins! \n You have {Coinamount}Trapcoins left"))
+                if betamount < 0:
+                    await ctx.channel.send(embed=discord.Embed(title=f"{player.display_name}, you can't bet negative amounts"))
+                else:
+                    if (puntjes[0]-betamount) >= 0:
+                        break
+                    elif (puntjes[0]-betamount) < 0:
+                        await ctx.channel.send(embed=discord.Embed(title= f"{player.display_name}, you don't have that many TrapCoins! \n You have {Coinamount}Trapcoins left"))
             except ValueError:
                 await ctx.channel.send(embed=discord.Embed(title=f"{player.display_name} Invalid bet, please give a number"))
 
